@@ -2,8 +2,9 @@
 title: "Data Visualization Project"
 author: "John Little"
 date: "6/19/2018"
-output: html_document
+output: html_document 
 ---
+<!-- html_document -->
 
 ```{r setup, include=FALSE}
 ## install packages if necessary
@@ -25,7 +26,7 @@ library(knitr)
 library(skimr)
 
 ## set working directory
-knitr::opts_knit$set(root.dir = '/cloud/project')
+# knitr::opts_knit$set(root.dir = '/cloud/project')
 ```
 
 # Part 1: Exploratory Data Analysis
@@ -38,8 +39,8 @@ The data we'll be using for this part of the project were downloaded from [kaggl
 First, we'll read the data in from our `data/raw_data` directory.
 
 ```{r pet-data, warning=FALSE} 
-pets <- read_csv("dataviz_project/raw_data/seattle_pet_licenses.csv") #, stringsAsFactors = FALSE)
-frog <- read.csv("/cloud/project/dataviz_project/raw_data/seattle_pet_licenses.csv", stringsAsFactors = FALSE)
+pets <- read_csv("../raw_data/seattle_pet_licenses.csv") #, stringsAsFactors = FALSE)
+# frog <- read.csv("/cloud/project/dataviz_project/raw_data/seattle_pet_licenses.csv", stringsAsFactors = FALSE)
 ```
 
 ## Explore the Data
@@ -108,7 +109,8 @@ pets %>%
   count(animal_s_name, sort = TRUE)
 ```
 
-```{r}
+```
+{r}
 frog %>% 
   mutate(date = lubridate::ymd_hms(license_issue_date))
 ```
@@ -157,15 +159,27 @@ pets %>%
 
 # Part 2: Explanatory Data Analysis
 
+
+from: https://leanpub.com/courses/jhu/cbds-visualization/quizzes/project_dataviz
+
+Phase 2
+
+The goals is to create this ![](../explanatory_figures/GOAL_fivethirtyeight_com---wp-content---uploads---2017---06---hickeydottle-steak-1-rd.png)
+
+
 The data used in this part of the project were dowloaded from [FiveThirtyEight](https://data.fivethirtyeight.com/) - `steak-survey`.  They were originally used in the article: [How Americans Like Their Steak](https://fivethirtyeight.com/features/how-americans-like-their-steak/). The goal of this part of the project will be to recreate the data visualization used in this article.
 
 ## The Data
 
 ```{r meat-data, warning=FALSE} 
 ## read in the data
-steak <- read.csv("data/raw_data/steak-risk-survey.csv", stringsAsFactors = FALSE) %>%
+steak <- read_csv("../raw_data/steak-risk-survey.csv") %>%  #, stringsAsFactors = FALSE) %>%
   ## remove first row which just includes the word "Response" in each column
   slice(2:n())
+  
+glimpse(steak)
+
+steak
 ```
 
 ## Explore the Data
@@ -173,14 +187,28 @@ steak <- read.csv("data/raw_data/steak-risk-survey.csv", stringsAsFactors = FALS
 ```{r meat-explore, warning=FALSE} 
 ## Include code here to explore the data 
 ## and answer the questions in the exercise
+
+skim(steak)
 ```
+
+```{r}
+steak %>% 
+  count(`Do you eat steak?`)
+```
+
+```{r}
+steak %>% 
+  count(`How do you like your steak prepared?`)
+```
+
+
 
 ## Wrangle the Data
 
 ```{r meat-wrangle, warning=FALSE} 
 ## wrangle the steak data set
 pref <- steak %>% 
-  mutate(steak_pref = factor(How.do.you.like.your.steak.prepared.,
+  mutate(steak_pref = factor(`How do you like your steak prepared?`, #How.do.you.like.your.steak.prepared.,
                              levels = c("Well",
                                         "Medium Well",
                                         "Medium",
@@ -198,7 +226,7 @@ pref <- steak %>%
 ## generate the plot 
 p <- ggplot(pref) +
   ## specify you want to generate a bar chart
-  function_name(aes(x = steak_pref, y = prop, fill = steak_pref),
+  geom_bar(aes(x = steak_pref, y = prop, fill = steak_pref),
                 stat = 'identity', 
                 width = 0.7) + 
   ## this adds text labels (you don't have to change anything here)
@@ -210,32 +238,33 @@ p <- ggplot(pref) +
             size = 5,
             color = "grey40") +
   ## flip coordinates to make horizontal box plot
-  function_name() +
+  coord_flip() +
   ## change the colors of the bars
-  function_name(values = c("#370B01", 
+  scale_fill_manual(values = c("#370B01", 
                            "#70402C",
                            "#955732", 
                            "#B36153",
                            "#B5413F")) +
   ## change the scale/labels of the steak-wellness variable (x-axis)
-  function_name(limits = levels(fct_rev(pref$steak_pref)),
+  scale_x_discrete(limits = levels(pref$steak_pref),
                 labels = c("Well", 
                            "Medium Well" = "Medium-well",
                            "Medium",
                            "Medium rare"="Medium-rare",
                            "Rare")) +
   ## change the scale/lables of the percent axis (y-axis)
-  function_name(labels = scales::percent, 
+  scale_y_continuous(labels = scales::percent, 
                 expand = c(mult = c(0,0), 
                            add = c(0,0.035))) +
   ## change the title, subtitle, and caption
-  function_name(title="'How Do You Like Your Steak Prepared?'", 
+  labs(title="How Do You Like Your Steak Prepared?", 
                 subtitle="From a survey of 432 steak-eating Americans",
-                caption="FiveThirtyEight: Surveymonkey") +
+                caption="FiveThirtyEight: Surveymonkey",
+       x = "") +
   ## change the theme (use ggthemes)
-  function_name() +
+  theme_bw() +
   ## fine tune the theme
-  function_name(axis.text = element_text(size = 14), 
+  theme(axis.text = element_text(size = 14), 
                 title = element_text(size = 16), 
                 legend.position="none", 
                 plot.caption=element_text(size = 12), 
@@ -251,19 +280,46 @@ p
 
 ```{r save-plot, warning=FALSE}
 ## save plot to figures/explanatory_figures directory
-ggsave(plot = OBJECT_NAME, filename = FILENAME, width = 8, height = 4)
+ggsave(plot = p, filename = "../exploratory_figures/steak.png", width = 8, height = 4)
 ```
 
 ## Visualize the Data
 
+```{r}
+library(hrbrthemes)
+```
+
+
 ```{r meat-plot, warning=FALSE} 
 ### Explore the data -- create your own plot!
+glimpse(steak)
 
+p2_better <- steak %>% 
+  rename(lottery = `Consider the following hypothetical situations: <br>In Lottery A, you have a 50% chance of success, with a payout of $100. <br>In Lottery B, you have a 90% chance of success, with a payout of $20. <br><br>Assuming you have $10 to bet, would you play Lottery A or Lottery B?`,
+         wellness = `How do you like your steak prepared?`) %>% 
+  drop_na(wellness, Gender, wellness, lottery) %>% 
+  ggplot(aes(fct_relevel(wellness, "Well", "Medium Well"))) +
+  geom_bar(aes(fill = Gender), position = "dodge") +
+  coord_flip() +
+  facet_wrap(~lottery) +
+  # scale_fill_brewer(palette = "Dark2") +
+  scale_fill_ipsum() +
+  labs(title = "Steak wellness by lottery preference for men and women",
+       subtitle = "Caution people prefer Medium rare",
+       y = "", x = "",
+       caption = "source: FiveThirtyEight survey of Longhorn Steakhouse") +
+  theme_ipsum_rc(grid = "X") +
+  theme(plot.title.position = "plot")
+p2_better
 ```
 
 ## Save this plot 
 
 ```{r save-meat-plot, warning=FALSE}
 ## save plot to figures/explanatory_figures directory
-ggsave(plot = OBJECT_NAME, filename = DIFFERENT_FILENAME)
+ggsave(plot = p2_better, filename = "../explanatory_figures/steak_wellness_lottery_gender.svg")
 ```
+
+
+![](../explanatory_figures/steak_wellness_lottery_gender.svg)
+
